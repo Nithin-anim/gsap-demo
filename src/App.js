@@ -1,57 +1,72 @@
 import React, { useState } from 'react';
-import './App.css';
 import video from './assets/video.mp4';
-import AnimatedText from './components/AnimatedText';
+import AnimatedTextComponent from './components/AnimatedTextComponent';
+import styled from 'styled-components';
+import AnimationController from './components/AnimationController';
+import getUniqId from './getUniqId';
+
+
+const Container = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100vh;
+`;
+
+const LeftPane = styled.div`
+  width: 60%;
+  align-self: center;
+  margin: 0px 20px;
+`;
+
+const RightPane = styled.div`
+  width: 40%;
+`;
+
+const Player = styled.video`
+  width: 700px;
+  height: 400px;
+`;
 
 const App = () => {
-  const [text, setText] = useState('Dummy Text');
-  const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
-  const [showAnimation, setShowAnimation] = useState(false);
-
-  const onChange = (e, type) => {
-    switch (type) {
-      case 'text':
-        setText(e.target.value);
-        break;
-      case 'start':
-        setStartTime(e.target.value);
-        break;
-      case 'end':
-        setEndTime(e.target.value);
-        break;
-      default:
-    }
-  }
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [effectList, setEffectList] = useState([{ id: getUniqId(), text: 'Dummy Text', startTime: 0, endTime: 0 }]);
 
   const onVideoPlayed = () => {
-    setTimeout(() => {
-      setShowAnimation(true);
-    }, startTime * 1000);
+    setIsPlaying(true);
   }
 
   const onVideoEnded = () => {
-    setShowAnimation(false);
+    setIsPlaying(false);
+  }
+
+  const createAction = () => {
+    setEffectList(prevState => [...prevState, { id: getUniqId(), text: 'Dummy Text', startTime: 0, endTime: 0 }]);
+  }
+
+  const removeAction = (id) => {
+    const effects = effectList;
+    setEffectList([...effects.filter(e => e.id !== id)]);
+  }
+
+  const updateEffectData = (type, id, value) => {
+    let effects = effectList;
+    const index = effects.findIndex(effect => effect.id === id);
+    if (index !== -1) {
+      effects[index][type] = value;
+      setEffectList([...effects])
+    }
   }
 
   return (
-    <div className="App">
-      <h1>GSAP Demo</h1>
-      <AnimatedText text={text} toggleAnimation={showAnimation} duartion={endTime} />
-      <video className={'player'} src={video} autoPlay controls width={'700px'} height={'400px'} onPlay={onVideoPlayed} onEnded={onVideoEnded} />
-      <div className={'field-container'}>
-        <label htmlFor={'text-input'}>Text</label>
-        <input id={'text-input'} className={'text-input'} type={'text'} value={text} onChange={(e) => onChange(e, 'text')} />
-      </div>
-      <div className={'field-container'}>
-        <label htmlFor={'start-input'}>Start At</label>
-        <input id={'start-input'} className={'text-input'} type={'number'} value={startTime} onChange={(e) => onChange(e, 'start')} />
-      </div>
-      <div className={'field-container'}>
-        <label htmlFor={'end-input'}>End At</label>
-        <input id={'end-input'} className={'text-input'} type={'number'} value={endTime} onChange={(e) => onChange(e, 'end')} />
-      </div>
-    </div>
+    <Container>
+      <LeftPane>
+        {effectList.map(effect => <AnimatedTextComponent text={effect.text} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} />)}
+        <Player src={video} controls onPlay={onVideoPlayed} onEnded={onVideoEnded} />
+      </LeftPane>
+      <RightPane>
+        {effectList.map(effect => <AnimationController key={effect.id} effectId={effect.id} createAction={createAction} removeAction={() => { removeAction(effect.id) }} updateEffectData={updateEffectData} />)}
+      </RightPane>
+    </Container>
   );
 }
 
