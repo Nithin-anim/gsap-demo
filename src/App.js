@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import video from './assets/video.mp4';
 import AnimatedTextComponent from './components/AnimatedTextComponent';
 import styled from 'styled-components';
-import AnimationController from './components/AnimationController';
+import AnimationController, { Action } from './components/AnimationController';
 import getUniqId from './getUniqId';
+import AnimatedMediaComponent from './components/AnimatedMediaComponent';
 
 
 const Container = styled.div`
@@ -25,22 +26,39 @@ const RightPane = styled.div`
 const Player = styled.video`
   width: 700px;
   height: 400px;
+  `;
+
+const PlayerContainer = styled.div`
+  width: 700px;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
 `;
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [effectList, setEffectList] = useState([{ id: getUniqId(), text: 'Dummy Text', startTime: 0, endTime: 0 }]);
+  const [isPaused, setIsPaused] = useState(false);
+  const [effectList, setEffectList] = useState([{ id: getUniqId(), effectType: 'Text', text: 'Dummy Text', startTime: 0, endTime: 0, color: '#FFFFFF' }]);
+  const playerRef = useRef(null);
 
   const onVideoPlayed = () => {
+    playerRef.current.play();
     setIsPlaying(true);
+    setIsPaused(false);
   }
 
   const onVideoEnded = () => {
     setIsPlaying(false);
   }
 
-  const createAction = () => {
-    setEffectList(prevState => [...prevState, { id: getUniqId(), text: 'Dummy Text', startTime: 0, endTime: 0 }]);
+  const onVideoPaused = () => {
+    playerRef.current.pause();
+    setIsPaused(true);
+  }
+
+  const createAction = (type = 'Text') => {
+    const newEffect = type === 'Text' ? { id: getUniqId(), effectType: 'Text', text: 'Dummy Text', startTime: 0, endTime: 0, color: '#FFFFFF' } : { id: getUniqId(), effectType: type, startTime: 0, endTime: 0 };
+    setEffectList(prevState => [...prevState, newEffect]);
   }
 
   const removeAction = (id) => {
@@ -60,11 +78,24 @@ const App = () => {
   return (
     <Container>
       <LeftPane>
-        {effectList.map(effect => <AnimatedTextComponent text={effect.text} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} />)}
-        <Player src={video} controls onPlay={onVideoPlayed} onEnded={onVideoEnded} />
+        <PlayerContainer>
+          {effectList.map(effect => {
+            if (effect.effectType === 'Text') {
+              return <AnimatedTextComponent key={effect.id} text={effect.text} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} color={effect.color} />
+            } else {
+              return <AnimatedMediaComponent key={effect.id} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} />
+            }
+          })}
+          <Player src={video} onEnded={onVideoEnded} ref={playerRef} />
+        </PlayerContainer>
+        <Action onClick={onVideoPlayed}>Play</Action>
+        <Action onClick={onVideoPaused} disabled={!isPlaying}>Pause</Action>
       </LeftPane>
       <RightPane>
-        {effectList.map(effect => <AnimationController key={effect.id} effectId={effect.id} createAction={createAction} removeAction={() => { removeAction(effect.id) }} updateEffectData={updateEffectData} />)}
+        <Action onClick={() => createAction()}>Add Text Effect</Action>
+        <Action onClick={() => createAction('Image')}>Add Image</Action>
+        <Action onClick={() => createAction('Video')}>Add Video</Action>
+        {effectList.map(effect => <AnimationController key={effect.id} effectType={effect.effectType} effectId={effect.id} removeAction={() => { removeAction(effect.id) }} updateEffectData={updateEffectData} />)}
       </RightPane>
     </Container>
   );

@@ -10,28 +10,30 @@ const Text = styled.div`
     width: 300px;
     height: 100px;
     font-size: 50px;
-    color: #FF0000;
 `;
 
-const AnimatedTextComponent = ({ text, startTime, endTime, isPlaying }) => {
+const AnimatedTextComponent = ({ text, startTime, endTime, isPlaying, color, isPaused }) => {
     const textRef = useRef();
-    const timelineRef = useRef();
+    const timelineRef = useRef(null);
 
     useEffect(() => {
         if (isPlaying) {
-            console.log('Rendered');
             timelineRef.current = gsap.timeline()
                 .to(textRef.current, { opacity: 1, delay: startTime })
                 .to(textRef.current, { rotation: '+=360', duration: endTime })
-                .to(textRef.current, { opacity: 0 })
-
+                .to(textRef.current, { opacity: 0 });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isPlaying, startTime, endTime, text])
+    }, [isPlaying, startTime, endTime, text]);
+
+    useEffect(() => {
+        if (timelineRef.current) {
+            timelineRef.current.paused(isPaused);
+        }
+    }, [isPaused])
 
     return (
         <>
-            <Text ref={textRef} style={{ opacity: 0 }}>{text}</Text >
+            <Text ref={textRef} style={{ opacity: 0, color: color }}>{text}</Text >
         </>
     )
 }
