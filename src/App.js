@@ -23,9 +23,9 @@ const RightPane = styled.div`
   width: 40%;
 `;
 
-const Player = styled.video`
-  width: 700px;
-  height: 400px;
+export const Player = styled.video`
+  width: ${props => props.videoWidth};
+  height: ${props => props.videoHeight};
   `;
 
 const PlayerContainer = styled.div`
@@ -38,7 +38,7 @@ const PlayerContainer = styled.div`
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [effectList, setEffectList] = useState([{ id: getUniqId(), effectType: 'Text', text: 'Dummy Text', startTime: 0, endTime: 0, color: '#FFFFFF' }]);
+  const [effectList, setEffectList] = useState([]);
   const playerRef = useRef(null);
 
   const onVideoPlayed = () => {
@@ -83,13 +83,14 @@ const App = () => {
             if (effect.effectType === 'Text') {
               return <AnimatedTextComponent key={effect.id} text={effect.text} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} color={effect.color} />
             } else {
-              return <AnimatedMediaComponent key={effect.id} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} />
+              return <AnimatedMediaComponent key={effect.id} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} type={effect.effectType} />
             }
           })}
-          <Player src={video} onEnded={onVideoEnded} ref={playerRef} />
+          <Player src={video} controls onEnded={onVideoEnded} ref={playerRef} videoWidth={'700px'} videoHeight={'400px'} />
         </PlayerContainer>
         <Action onClick={onVideoPlayed}>Play</Action>
         <Action onClick={onVideoPaused} disabled={!isPlaying}>Pause</Action>
+        <Action onClick={() => playerRef.current.currentTime = 0} disabled={!isPlaying}>Stop</Action>
       </LeftPane>
       <RightPane>
         <Action onClick={() => createAction()}>Add Text Effect</Action>

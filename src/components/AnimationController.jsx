@@ -64,7 +64,7 @@ const AnimationController = ({ effectType, removeAction, updateEffectData, effec
 
     return (
         <EffectBox>
-            <div>{effectType} effect</div>
+            <div style={{ color: '#FFFFFF', borderBottom: '1px solid #FFFFFF' }}> {effectType} effect</div>
             {effectType === 'Text' && <><FieldContainer>
                 <label htmlFor={'text-input'}>Text</label>
                 <Field id={'text-input'} type={'text'} value={text} onChange={(e) => onChange(e, 'text')} />
