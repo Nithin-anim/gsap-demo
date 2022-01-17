@@ -86,11 +86,11 @@ const App = () => {
               return <AnimatedMediaComponent key={effect.id} startTime={effect.startTime} endTime={effect.endTime} isPlaying={isPlaying} isPaused={isPaused} type={effect.effectType} />
             }
           })}
-          <Player src={video} controls onEnded={onVideoEnded} ref={playerRef} videoWidth={'700px'} videoHeight={'400px'} />
+          <Player src={video} onEnded={onVideoEnded} ref={playerRef} videoWidth={'700px'} videoHeight={'400px'} />
         </PlayerContainer>
         <Action onClick={onVideoPlayed}>Play</Action>
         <Action onClick={onVideoPaused} disabled={!isPlaying}>Pause</Action>
-        <Action onClick={() => playerRef.current.currentTime = 0} disabled={!isPlaying}>Stop</Action>
+        <Action onClick={() => playerRef.current.currentTime = 40} disabled={!isPlaying}>Stop</Action>
       </LeftPane>
       <RightPane>
         <Action onClick={() => createAction()}>Add Text Effect</Action>
